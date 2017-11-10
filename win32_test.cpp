@@ -467,6 +467,12 @@ WinMain(HINSTANCE Instance,
 
             int16 *Samples = (int16 *)VirtualAlloc(0, SoundOutput.SecondaryBufferSize,
                                                    MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
+
+            game_memory GameMemory = {};
+            GameMemory.PermanentStorageSize = Megabytes(64);
+            GameMemory.PermanentStorage = ;
+            GameMemory.IsInitialized = ;
+
             game_input Input[2] = {};
             game_input *NewInput = &Input[0];
             game_input *OldInput = &Input[1];
@@ -619,8 +625,7 @@ WinMain(HINSTANCE Instance,
                 game_sound_output_buffer SoundBuffer = {};
                 SoundBuffer.SamplesPerSecond = SoundOutput.SamplesPerSecond;
                 SoundBuffer.SampleCount = BytesToWrite / SoundOutput.BytesPerSample;
-                SoundBuffer.Samples = Samples;
-                
+                SoundBuffer.Samples = Samples;               
 
                 game_offscreen_buffer  Buffer = {};
                 Buffer.Memory = GlobalBackbuffer.Memory;
@@ -628,7 +633,7 @@ WinMain(HINSTANCE Instance,
                 Buffer.Height = GlobalBackbuffer.Height;
                 Buffer.Pitch = GlobalBackbuffer.Pitch;
                                                 
-                GameUpdateAndRender(NewInput, &Buffer, &SoundBuffer);
+                GameUpdateAndRender(GameMemory, NewInput, &Buffer, &SoundBuffer);
 
                 /*
                  * DirectSound Setup

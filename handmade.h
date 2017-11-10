@@ -62,9 +62,25 @@ struct game_input
     game_controller_input Controllers[4];
 };
 
-internal void GameUpdateAndRender(game_input *Input,
+struct game_memory
+{
+    bool32 IsInitialized;
+    uint64 PermanentStorageSize;
+    void *PermanentStorage;
+}
+
+internal void GameUpdateAndRender(game_memory *Memory,
+                                  game_input *Input,
                                   game_offscreen_buffer *Buffer,
                                   game_sound_output_buffer *SoundBuffer);
+
+struct game_state
+{
+    int XOffset;
+    int YOffset;
+    int ToneHz;
+
+}
 
 #define HANDMADE_H
 #endif
