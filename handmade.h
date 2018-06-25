@@ -1,5 +1,9 @@
 #if !defined(HANDMADE_H)
 
+#define Kilobytes(value) ((value)*1024)
+#define Megabytes(value) (Kilobytes(value)*1024)
+#define Gigabytes(value) (Megabytes(value)*1024)
+
 #define ArrayCount(Array) (sizeof(Array) / sizeof((Array)[0]))
 
 struct game_sound_output_buffer
@@ -67,7 +71,7 @@ struct game_memory
     bool32 IsInitialized;
     uint64 PermanentStorageSize;
     void *PermanentStorage;
-}
+};
 
 internal void GameUpdateAndRender(game_memory *Memory,
                                   game_input *Input,
@@ -79,8 +83,7 @@ struct game_state
     int XOffset;
     int YOffset;
     int ToneHz;
-
-}
+};
 
 #define HANDMADE_H
 #endif
