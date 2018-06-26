@@ -1,7 +1,11 @@
 #if !defined(HANDMADE_H)
 
+#define Assert(Expression) \
+    if(!(Expression)) {*(int *)0 = 0;}
+
 #define Kilobytes(value) ((value)*1024)
 #define Megabytes(value) (Kilobytes(value)*1024)
+#define Gigabytes(value) (Megabytes(value)*1024)
 
 #define ArrayCount(Array) (sizeof(Array) / sizeof((Array)[0]))
 
@@ -69,7 +73,10 @@ struct game_memory
 {
     bool32 IsInitialized;
     uint64 PermanentStorageSize;
-    void *PermanentStorage;
+    void *PermanentStorage; // INFO: REQUIRED to be cleared to zero at startup
+
+    uint64 TransientStorageSize;
+    void *TransientStorage; // INFO: REQUIRED to be cleared to zero at startup
 };
 
 internal void GameUpdateAndRender(game_memory *Memory,
