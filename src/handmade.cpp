@@ -35,9 +35,9 @@ RenderWeirdGradient(game_offscreen_buffer *Buffer, int XOffset, int YOffset)
             X < Buffer->Width;
             ++X)
         {
-            uint8 Blue = (X + XOffset);
+            uint8 Blue = (uint8)(X + XOffset);
             uint8 Red = 0;
-            uint8 Green = (Y + YOffset);
+            uint8 Green = (uint8)(Y + YOffset);
           
             *Pixel++  = ((Green << 8) | Blue);
         }
@@ -73,16 +73,15 @@ internal void GameUpdateAndRender(game_memory *Memory,
     }
 
     game_controller_input *Input0 = &Input->Controllers[0];
-
     if(Input0->IsAnalog)
     {
-        GameState->XOffset += (int)4.0f*(Input0->EndX);
+        GameState->XOffset += (int)(4.0f*(Input0->EndX));
         GameState->ToneHz = 256 + (int)(128.0f*(Input0->EndY));
     }
     else
     {
     }
-    GameState->YOffset += .5f;
+    GameState->YOffset += 1;
     
     GameOutputSound(SoundBuffer, GameState->ToneHz);
     RenderWeirdGradient(Buffer, GameState->XOffset, GameState->YOffset);
