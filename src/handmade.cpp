@@ -18,7 +18,7 @@ GameOutputSound(game_sound_output_buffer *SoundBuffer, int ToneHz)
         *SampleOut++ = SampleValue;
         *SampleOut++ = SampleValue;
 
-        tSine += 2.0f*Pi32*1.0f / (real32)WavePeriod;
+        tSine += (real32)(2.0f*Pi32*1.0f) / (real32)WavePeriod;
     }
 }
 
@@ -58,6 +58,15 @@ internal void GameUpdateAndRender(game_memory *Memory,
 
     if(!Memory->IsInitialized)
     {
+        char *Filename = __FILE__;
+
+        debug_read_file_result File = DEBUGPlatformReadEntireFile(Filename);
+        if(File.Contents)
+        {
+            DEBUGPlatformWriteEntireFile("test.out", File.ContentsSize, File.Contents);
+            DEBUGPlatformFreeFileMemory(File.Contents);
+        }
+        
         GameState->ToneHz = 256;
         
         Memory->IsInitialized = true;
@@ -72,16 +81,8 @@ internal void GameUpdateAndRender(game_memory *Memory,
     }
     else
     {
-        
     }
-
-    // Input.AButtonEndedDown;
-    // Input.AButtonHalfTranstionCount;
-
-    if(Input0->Down.EndedDown)
-    {
-        GameState->YOffset += 1;
-    }
+    GameState->YOffset += .5f;
     
     GameOutputSound(SoundBuffer, GameState->ToneHz);
     RenderWeirdGradient(Buffer, GameState->XOffset, GameState->YOffset);

@@ -1,13 +1,37 @@
 #if !defined(HANDMADE_H)
 
-#define Assert(Expression) \
-    if(!(Expression)) {*(int *)0 = 0;}
+#if HANDMADE_SLOW
+#define Assert(Expression)
+#else
+#define Assert(Expression) if(!(Expression)) {*(int *)0 = 0;}
+#endif
 
 #define Kilobytes(value) ((value)*1024)
 #define Megabytes(value) (Kilobytes(value)*1024)
 #define Gigabytes(value) (Megabytes(value)*1024)
+#define Terabytes(value) (Gigabytes(value)*1024)
 
 #define ArrayCount(Array) (sizeof(Array) / sizeof((Array)[0]))
+
+internal uint32
+SafeTruncateUint64(uint64 Value)
+{
+    Assert(Value <= 0xFFFFFFFF);
+    uint32 Result = (uint32)Value;
+    return(Result);
+}
+
+#if HANDMADE_INTERNAL
+struct debug_read_file_result
+{
+    uint32 ContentsSize;
+    void *Contents;
+};
+internal debug_read_file_result DEBUGPlatformReadEntireFile(char *Filename);
+internal void DEBUGPlatformFreeFileMemory(void *Memory);
+
+internal bool32 DEBUGPlatformWriteEntireFile(char *Filename, uint32 MemorySize, void *Memory);
+#endif
 
 struct game_sound_output_buffer
 {

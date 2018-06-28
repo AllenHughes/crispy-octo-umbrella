@@ -70,6 +70,87 @@ Win32LoadXInput(void)
 #define DIRECT_SOUND_CREATE(name) HRESULT WINAPI name(LPGUID pcGuidDevice,LPDIRECTSOUND *ppDS, LPUNKNOWN pUnkOuter);
 typedef DIRECT_SOUND_CREATE(direct_sound_create);
 
+internal debug_read_file_result
+DEBUGPlatformReadEntireFile(char *Filename)
+{
+    debug_read_file_result Result = {};
+    
+    HANDLE FileHandle = CreateFileA(Filename, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+    if(FileHandle != INVALID_HANDLE_VALUE)
+    {
+        LARGE_INTEGER FileSize;
+        if(GetFileSizeEx(FileHandle, &FileSize))
+        {
+            uint32 FileSize32 = SafeTruncateUint64(FileSize.QuadPart);
+            Result.Contents = VirtualAlloc(0, FileSize32, MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
+            if(Result.Contents)
+            {
+                DWORD BytesRead;
+                if(ReadFile(FileHandle, Result.Contents, FileSize32, &BytesRead, 0) && (FileSize32 == BytesRead))
+                {
+                    Result.ContentsSize = FileSize32;
+                }
+                else
+                {
+                    DEBUGPlatformFreeFileMemory(Result.Contents);
+                    Result.Contents = 0;
+                }
+            }
+            else
+            {
+            }
+        }
+        else
+        {
+        }
+        CloseHandle(FileHandle);
+    }
+    else
+    {
+    }
+    
+    return(Result);
+}
+internal void
+DEBUGPlatformFreeFileMemory(void *Memory)
+{
+    if(Memory)
+    {
+        VirtualFree(Memory, 0, MEM_RELEASE);
+    }
+}
+internal bool32
+DEBUGPlatformWriteEntireFile(char *Filename, uint32 MemorySize, void *Memory)
+{
+    bool32 Result = false;
+    
+    HANDLE FileHandle = CreateFileA(Filename, GENERIC_WRITE, 0, 0, CREATE_ALWAYS, 0, 0);
+    if(FileHandle != INVALID_HANDLE_VALUE)
+    {
+        LARGE_INTEGER FileSize;
+        if(GetFileSizeEx(FileHandle, &FileSize))
+        {
+            DWORD BytesWritten;
+            if(WriteFile(FileHandle, Memory, MemorySize, &BytesWritten, 0))
+            {
+                Result = (BytesWritten == MemorySize);
+            }
+            else
+            {
+            }
+        }
+        else
+        {
+        }
+        CloseHandle(FileHandle);
+    }
+    else
+    {
+    }
+    
+    return(Result);
+}
+
 internal void
 Win32InitDSound(HWND Window, int32 SamplesPerSecond, int32 BufferSize)
 {
@@ -456,15 +537,19 @@ WinMain(HINSTANCE Instance,
 
             int16 *Samples = (int16 *)VirtualAlloc(0, SoundOutput.SecondaryBufferSize,
                                                    MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
-
+#if HANDMADE_INTERNAL
+            LPVOID BaseAddress = (LPVOID)Terabytes((uint64)2);
+#else
+            LPVOID BaseAddress = 0;
+#endif
+            
             game_memory GameMemory = {};
             GameMemory.PermanentStorageSize = Megabytes(64);
-            GameMemory.PermanentStorage = VirtualAlloc(0, GameMemory.PermanentStorageSize,
+            GameMemory.TransientStorageSize = Gigabytes(1);
+            uint64 TotalSize = GameMemory.PermanentStorageSize + GameMemory.TransientStorageSize;
+            GameMemory.PermanentStorage = VirtualAlloc(BaseAddress, TotalSize,
                                                        MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
-            
-            GameMemory.TransientStorageSize = Gigabytes((uint64)4);
-            GameMemory.TransientStorage = VirtualAlloc(0, GameMemory.PermanentStorageSize,
-                                                       MEM_RESERVE|MEM_COMMIT, PAGE_READWRITE);
+            GameMemory.TransientStorage = (uint8 *)GameMemory.PermanentStorage + GameMemory.PermanentStorageSize;
 
             
             if(Samples && GameMemory.PermanentStorage && GameMemory.TransientStorage)
